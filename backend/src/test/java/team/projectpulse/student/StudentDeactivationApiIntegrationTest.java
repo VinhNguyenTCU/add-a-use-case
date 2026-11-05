@@ -44,6 +44,11 @@ class StudentDeactivationApiIntegrationTest extends AbstractIntegrationTest {
         Section section = students.findById(4).orElseThrow().getSection();
         section.getInstructors().removeIf(i -> i.getId().equals(1));
         em.flush();
+        // T1/T8: the owner must be able to load the form before confirming deactivation.
+        mvc.perform(get("/api/v1/students/4").header(HttpHeaders.AUTHORIZATION, owner))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.data.id").value(4));
+        mvc.perform(get("/api/v1/students/4").header(HttpHeaders.AUTHORIZATION, unrelated))
+                .andExpect(status().isForbidden());
         deactivate(4, owner);
         section.getInstructors().removeIf(i -> i.getId().equals(2));
         em.flush();
