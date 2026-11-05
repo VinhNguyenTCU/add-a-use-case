@@ -699,8 +699,16 @@ class EvaluationServiceTest {
                 .containsExactly(this.john.getId(), this.eric.getId());
         PeerEvaluationAverage retained = report.getPeerEvaluationAverages().get(1);
         assertThat(retained.getTeamName()).isNull();
-        assertThat(retained.getAverageTotalScore()).isEqualTo(this.ericsW32Evaluations.stream().mapToDouble(PeerEvaluation::getTotalScore).average().orElseThrow());
-        assertThat(retained.getPublicComments()).containsExactlyElementsOf(this.ericsW32Evaluations.stream().map(PeerEvaluation::getPublicComment).toList());
+        // BR-evaluation-inactive-student and the UC-EVA report algorithm: retained
+        // fixture totals are 54, 34, 37; criterion columns average independently.
+        assertThat(retained.getAverageTotalScore()).isEqualTo(125.0 / 3.0);
+        assertThat(retained.getPublicComments()).containsExactly(
+                "Eric was sick last week.", "I was not on campus last week!", "eric needs to attend meeting!");
+        assertThat(retained.getPrivateComments()).containsExactly(
+                "John wrote this private comment!", "I am eric.", "I am Jerry.");
+        assertThat(retained.getRatingAverages()).extracting(RatingAverage::getCriterionId, RatingAverage::getAverageScore)
+                .containsExactlyInAnyOrder(tuple(1, 19.0 / 3.0), tuple(2, 10.0), tuple(3, 17.0 / 3.0),
+                        tuple(4, 7.0), tuple(5, 19.0 / 3.0), tuple(6, 19.0 / 3.0));
     }
 
 }
