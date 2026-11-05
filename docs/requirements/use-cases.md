@@ -1484,6 +1484,8 @@ Details:
 - **1a. The caller lacks permission under BR-student-lifecycle or is not authenticated:**
   - 1a1. The system denies an authenticated unauthorized caller with 403, or an unauthenticated caller with 401, and changes nothing. Authorization is enforced again at step 6 and applies to already inactive students too.
   - 1a2. A nonexistent student identifier receives the same 403 refusal as an inaccessible identifier, without revealing whether the account exists.
+- **4a. The course admin or instructor cancels or dismisses the warning:**
+  - 4a1. The system closes the warning, sends no deactivation request, and leaves the student's account, membership, and submitted work unchanged. Use case ends.
 **Priority:** Low
 **Frequency of Use:** Rare. Occurs occasionally when a student withdraws from a course section.
 **Business Rules:** BR-student-lifecycle; BR-section-scoped-access; BR-student-deactivation-membership; BR-submission-owed; BR-evaluation-inactive-student
