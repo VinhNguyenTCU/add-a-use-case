@@ -1481,9 +1481,12 @@ Details:
   - 6c1. From the first protected request after deactivation commits, the system denies access under FR-SEC-active-account, including requests with an unexpired token. Requests already authorized before that commit may finish.
 - **6d. The selected student is already inactive, including a concurrent deactivation:**
   - 6d1. After checking authorization, the system reports successful deactivation without changing membership or submitted work. Repeated deactivation is idempotent.
+- **1a. The caller lacks permission under BR-student-lifecycle or is not authenticated:**
+  - 1a1. The system denies an authenticated unauthorized caller with 403, or an unauthenticated caller with 401, and changes nothing. Authorization is enforced again at step 6 and applies to already inactive students too.
+  - 1a2. A nonexistent student identifier receives the same 403 refusal as an inaccessible identifier, without revealing whether the account exists.
 **Priority:** Low
 **Frequency of Use:** Rare. Occurs occasionally when a student withdraws from a course section.
-**Business Rules:** BR-student-lifecycle; BR-student-deactivation-membership; BR-submission-owed; BR-evaluation-inactive-student
+**Business Rules:** BR-student-lifecycle; BR-section-scoped-access; BR-student-deactivation-membership; BR-submission-owed; BR-evaluation-inactive-student
 
 **Associated Information:**
 - Consequence of the deactivation: The student will no longer be able to log in or submit weekly activity reports and peer evaluations, but the student's account and her previously submitted work are kept in the system. Deactivation will NOT remove the student from the system, and the account can be reactivated in the future (UC-STU-reactivate-student: Reactivate a student). This is distinct from deletion (UC-STU-delete-student: Delete a student), which is a physical, unrecoverable delete. The course admin or instructor shall be able to cancel the use case at any time prior to submitting it.
