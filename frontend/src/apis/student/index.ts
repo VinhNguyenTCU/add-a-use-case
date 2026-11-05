@@ -7,7 +7,6 @@ import type {
   DeleteStudentResponse,
   FindStudentByIdResponse,
   UpdateStudentResponse,
-  DeactivateStudentResponse,
   Student,
   RegistrationParams,
   FindStudentByTeamIdResponse
@@ -32,15 +31,11 @@ export const findStudentsByTeamId = (teamId: number) =>
 export const createStudent = (newStudent: Student, params: RegistrationParams) =>
   request.post<any, CreateStudentResponse>(API.STUDENTS_ENDPOINT, newStudent, { params })
 
-export const updateStudent = (updatedStudent: Student, expectedEnabled?: boolean) =>
+export const updateStudent = (updatedStudent: Student) =>
   request.put<any, UpdateStudentResponse>(
     `${API.STUDENTS_ENDPOINT}/${updatedStudent.id}`,
-    updatedStudent,
-    { params: { expectedEnabled } }
+    updatedStudent
   )
 
 export const deleteStudent = (id: number) =>
   request.delete<any, DeleteStudentResponse>(`${API.STUDENTS_ENDPOINT}/${id}`)
-
-export const deactivateStudent = (id: number) =>
-  request.post<any, DeactivateStudentResponse>(`${API.STUDENTS_ENDPOINT}/${id}/deactivate`)

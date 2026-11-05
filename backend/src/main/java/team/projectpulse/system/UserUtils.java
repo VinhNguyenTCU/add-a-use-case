@@ -33,12 +33,8 @@ public class UserUtils {
         if (claim == null) return null;
 
         if (claim instanceof Integer i) return i;
-        try {
-            if (claim instanceof Long l) return Math.toIntExact(l);
-            if (claim instanceof String s) return Integer.valueOf(s);
-        } catch (ArithmeticException | NumberFormatException ex) {
-            return null;
-        }
+        if (claim instanceof Long l) return l.intValue();
+        if (claim instanceof String s) return Integer.valueOf(s);
 
         return null;
     }
@@ -110,7 +106,7 @@ public class UserUtils {
 
     public boolean hasRole(String role) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        return authentication != null && authentication.isAuthenticated() && authentication.getAuthorities().stream()
+        return authentication.getAuthorities().stream()
                 .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals(role));
     }
 }
