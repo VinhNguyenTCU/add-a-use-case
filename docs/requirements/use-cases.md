@@ -1479,6 +1479,8 @@ Details:
   - 6b1. The system applies BR-evaluation-inactive-student; submission obligations remain governed by BR-submission-owed.
 - **6c. The student has an existing authenticated session:**
   - 6c1. From the first protected request after deactivation commits, the system denies access under FR-SEC-active-account, including requests with an unexpired token. Requests already authorized before that commit may finish.
+- **6d. The selected student is already inactive, including a concurrent deactivation:**
+  - 6d1. After checking authorization, the system reports successful deactivation without changing membership or submitted work. Repeated deactivation is idempotent.
 **Priority:** Low
 **Frequency of Use:** Rare. Occurs occasionally when a student withdraws from a course section.
 **Business Rules:** BR-student-lifecycle; BR-student-deactivation-membership; BR-submission-owed; BR-evaluation-inactive-student
