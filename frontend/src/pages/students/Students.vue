@@ -43,8 +43,6 @@
         <template #default="{ row }">
           <el-button
             icon="Edit"
-            data-cy="student-edit"
-            aria-label="Edit student"
             circle
             plain
             type="primary"
@@ -69,19 +67,10 @@
       style="margin-top: 20px; justify-content: flex-end"
     />
     <!-- Dialog for editing student -->
-    <el-dialog
-      v-model="dialogVisible"
-      title="Edit a student"
-      width="min(560px, 92vw)"
-      destroy-on-close
-      :show-close="!editingBusy"
-      :close-on-click-modal="!editingBusy"
-      :close-on-press-escape="!editingBusy"
-    >
+    <el-dialog v-model="dialogVisible" title="Edit a student" width="30%" destroy-on-close>
       <EditStudentForm
         :studentId="studentBeingEditedId"
         @close-dialog="closeDialog"
-        @busy-change="editingBusy = $event"
       ></EditStudentForm>
     </el-dialog>
   </el-card>
@@ -162,7 +151,6 @@ function handlePageSizeChange(newSize: number) {
 
 // Dialog for adding or editing artifacts
 const dialogVisible = ref(false)
-const editingBusy = ref(false)
 
 const studentBeingEditedId = ref<number>() // ID of the artifact being edited, it will be passed to the EditArtifactForm component as a prop
 

@@ -35,7 +35,7 @@ Reused and extended:
 
 New:
 
-- `security/authorizationmanagers/StudentLifecycleAuthorizationManager`: route authorization delegated to a new `StudentSecurityService.canDeactivateStudent` check. Require an instructor/admin authority and either matching course ownership or assignment to the student's course section. Missing/malformed IDs and broken ownership links fail closed.
+- `student/StudentLifecycleAuthorizationManager`: route authorization delegated to a new `StudentSecurityService.canDeactivateStudent` check. Require an instructor/admin authority and either matching course ownership or assignment to the student's course section. Missing/malformed IDs and broken ownership links fail closed.
 - `security/ActiveAccountTokenValidator`: validator composed with the decoder's default token validators, including expiry, rather than replacing defaults. A missing account or disabled account produces an invalid-token result through the existing bearer-token entry point. Basic login continues to use `MyUserPrincipal.isEnabled`.
 
 ## Sequence
@@ -97,7 +97,6 @@ Paths below use the configured `/api/v1` base and existing `Result` envelope.
 | Endpoint / behavior | Caller | Request | Success | Errors / extensions |
 |---|---|---|---|---|
 | **New** `POST /students/{studentId}/deactivate` | Owning course admin or instructor assigned to student's course section | Path ID; no body | HTTP 200, success envelope with StudentDto, `enabled=false`; 6d uses the same response | 1a: HTTP 401 if unauthenticated; HTTP 403 if unauthorized, missing, or inaccessible ID; no mutation |
-| **Changed** `GET /students/{studentId}` | Existing self/assigned-instructor access, or owning course admin via lifecycle guard | Path ID | Existing StudentDto envelope so an owning admin without course-section assignment can load the confirmation form | Existing read refusals; lifecycle scope does not grant an unrelated course admin access |
 | **Changed** `PUT /students/{studentId}` | Existing authorized callers | Existing validated StudentDto plus optional `expectedEnabled` query parameter containing status observed when form loaded | Existing profile update; preserve existing inactive-to-active path when `expectedEnabled=false` | HTTP 400 for active-to-inactive transition; HTTP 409 if supplied expected status differs from locked current status, or reactivation omits expected status; no partial profile changes |
 | **Changed** bearer authentication on protected requests | Existing token holders | Existing JWT | Existing response for active accounts | 6c: HTTP 401 for disabled/missing account, even when token is unexpired |
 | **Changed** `POST /evaluations` | Existing authorized active evaluator | Existing validated evaluation payload | Existing response | 6b: HTTP 400 for an inactive evaluatee; no new evaluation |
@@ -143,8 +142,6 @@ Each row is a definition of done; the build PR maps these IDs to actual test met
 | T9 | 4a | Cypress | Cancel, close, Escape leave state unchanged and make zero deactivation calls; pending confirm prevents double submit; failed request shows no success and permits retry. |
 | T10 | Dedicated-action invariant; stale profile save | Unit; backend integration | Generic PUT cannot disable active student or partially save profile on refusal; a form loaded active then saved after deactivation receives 409 without reactivating; ordinary profile updates and explicit existing reactivation with expected inactive status remain functional. Exercise separate committed transactions for the stale save and serialize writes without overwriting other profile fields. |
 | T11 | 6a/6b; BR-submission-owed | Reminder/service integration | Deactivated student owes neither item and receives no reminder; active teammate's remaining obligation excludes inactive student; other active targets still count. |
-
-The lifecycle authorization manager resides beside the existing route wrappers in `security/authorizationmanagers/`, reusing their `PathVariables.readId` helper; the domain permission decision remains in `StudentSecurityService`. This implementation placement correction does not change authorization policy.
 
 ## Implementation and review order
 

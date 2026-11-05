@@ -28,10 +28,4 @@ public interface PeerEvaluationRepository extends JpaRepository<PeerEvaluation, 
             """)
     List<Object[]> findEvaluatorAndEvaluateeIds(@Param("sectionId") Integer sectionId, @Param("week") String week);
 
-    @Query("""
-            select distinct e.evaluatee.id from PeerEvaluation e
-            where e.week = :week and e.evaluatee.section.sectionId = :sectionId
-            """)
-    List<Integer> findEvaluateeIds(@Param("sectionId") Integer sectionId, @Param("week") String week);
-
 }
