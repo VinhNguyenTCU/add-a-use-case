@@ -1477,12 +1477,15 @@ Details:
   - 6a1. The system applies BR-student-deactivation-membership and completes step 6.
 - **6b. Teammates evaluate the student after deactivation or the instructor requests a weekly report:**
   - 6b1. The system applies BR-evaluation-inactive-student; submission obligations remain governed by BR-submission-owed.
+- **6c. The student has an existing authenticated session:**
+  - 6c1. From the first protected request after deactivation commits, the system denies access under FR-SEC-active-account, including requests with an unexpired token. Requests already authorized before that commit may finish.
 **Priority:** Low
 **Frequency of Use:** Rare. Occurs occasionally when a student withdraws from a course section.
 **Business Rules:** BR-student-lifecycle; BR-student-deactivation-membership; BR-submission-owed; BR-evaluation-inactive-student
 
 **Associated Information:**
 - Consequence of the deactivation: The student will no longer be able to log in or submit weekly activity reports and peer evaluations, but the student's account and her previously submitted work are kept in the system. Deactivation will NOT remove the student from the system, and the account can be reactivated in the future (UC-STU-reactivate-student: Reactivate a student). This is distinct from deletion (UC-STU-delete-student: Delete a student), which is a physical, unrecoverable delete. The course admin or instructor shall be able to cancel the use case at any time prior to submitting it.
+- The confirmation warning states the retained membership and work, loss of login and existing-session access, suppression of reminders, and the peer-evaluation and weekly-report consequences by reference to BR-student-deactivation-membership, BR-submission-owed, BR-evaluation-inactive-student, and FR-SEC-active-account.
 
 **Related Use Cases:** UC-STU-delete-student: Delete a student; UC-STU-reactivate-student: Reactivate a student
 **Assumptions:**
