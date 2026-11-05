@@ -35,7 +35,7 @@ Reused and extended:
 
 New:
 
-- `student/StudentLifecycleAuthorizationManager`: route authorization delegated to a new `StudentSecurityService.canDeactivateStudent` check. Require an instructor/admin authority and either matching course ownership or assignment to the student's course section. Missing/malformed IDs and broken ownership links fail closed.
+- `security/authorizationmanagers/StudentLifecycleAuthorizationManager`: route authorization delegated to a new `StudentSecurityService.canDeactivateStudent` check. Require an instructor/admin authority and either matching course ownership or assignment to the student's course section. Missing/malformed IDs and broken ownership links fail closed.
 - `security/ActiveAccountTokenValidator`: validator composed with the decoder's default token validators, including expiry, rather than replacing defaults. A missing account or disabled account produces an invalid-token result through the existing bearer-token entry point. Basic login continues to use `MyUserPrincipal.isEnabled`.
 
 ## Sequence
@@ -142,6 +142,8 @@ Each row is a definition of done; the build PR maps these IDs to actual test met
 | T9 | 4a | Cypress | Cancel, close, Escape leave state unchanged and make zero deactivation calls; pending confirm prevents double submit; failed request shows no success and permits retry. |
 | T10 | Dedicated-action invariant; stale profile save | Unit; backend integration | Generic PUT cannot disable active student or partially save profile on refusal; a form loaded active then saved after deactivation receives 409 without reactivating; ordinary profile updates and explicit existing reactivation with expected inactive status remain functional. Exercise separate committed transactions for the stale save and serialize writes without overwriting other profile fields. |
 | T11 | 6a/6b; BR-submission-owed | Reminder/service integration | Deactivated student owes neither item and receives no reminder; active teammate's remaining obligation excludes inactive student; other active targets still count. |
+
+The lifecycle authorization manager resides beside the existing route wrappers in `security/authorizationmanagers/`, reusing their `PathVariables.readId` helper; the domain permission decision remains in `StudentSecurityService`. This implementation placement correction does not change authorization policy.
 
 ## Implementation and review order
 
