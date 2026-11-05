@@ -26,6 +26,7 @@
       stripe
       border
       height="600"
+      data-cy="evaluation-targets"
       v-loading="loading"
       scrollbar-always-on
     >
@@ -106,12 +107,18 @@
     <div style="display: flex; justify-content: flex-end">
       <el-button
         type="primary"
+        data-cy="evaluation-submit"
         @click="submitPeerEvaluations"
         v-if="isNewSubmission"
         :loading="isLoading"
         >Submit</el-button
       >
-      <el-button type="warning" @click="updatePeerEvaluations" :loading="isLoading" v-else
+      <el-button
+        type="warning"
+        data-cy="evaluation-update"
+        @click="updatePeerEvaluations"
+        :loading="isLoading"
+        v-else
         >Update</el-button
       >
     </div>
@@ -174,7 +181,7 @@ onMounted(async () => {
   sectionId.value = (userInfoStore.userInfo as Student).sectionId
   await loadCriteria()
   loading.value = true
-  prepareStartingPeerEvaluations()
+  await prepareStartingPeerEvaluations()
   loading.value = false
 })
 
@@ -209,19 +216,21 @@ async function prepareStartingPeerEvaluations() {
   } else {
     // If not, create a new set of evaluations
     isNewSubmission = true
-    peerEvalutions.value = students.value.map((student) => ({
-      week: previousWeek.value,
-      evaluatorId: (userInfoStore.userInfo as Student).id as number,
-      evaluateeId: student.id as number,
-      evaluateeName: `${student.firstName} ${student.lastName}`,
-      ratings: criteria.value.map((criterion) => ({
-        criterionId: criterion.criterionId as number,
-        criterion: criterion.criterion,
-        actualScore: 10 // Default score, can be changed by the user
-      })),
-      publicComment: '',
-      privateComment: ''
-    }))
+    peerEvalutions.value = students.value
+      .filter((student) => student.enabled)
+      .map((student) => ({
+        week: previousWeek.value,
+        evaluatorId: (userInfoStore.userInfo as Student).id as number,
+        evaluateeId: student.id as number,
+        evaluateeName: `${student.firstName} ${student.lastName}`,
+        ratings: criteria.value.map((criterion) => ({
+          criterionId: criterion.criterionId as number,
+          criterion: criterion.criterion,
+          actualScore: 10 // Default score, can be changed by the user
+        })),
+        publicComment: '',
+        privateComment: ''
+      }))
   }
 }
 
