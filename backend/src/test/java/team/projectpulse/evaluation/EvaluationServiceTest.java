@@ -673,4 +673,34 @@ class EvaluationServiceTest {
         assertThat(peerEvaluations.get(2).getTotalScore()).isCloseTo(49.0, within(0.01));
     }
 
+    @Test
+    void testInactiveEvaluateeRefusedWithoutSaving() {
+        given(this.clock.instant()).willReturn(Instant.parse("2023-08-07T23:30:00Z"));
+        given(this.clock.getZone()).willReturn(ZoneId.of("UTC"));
+        this.eric.setEnabled(false);
+        PeerEvaluation request = new PeerEvaluation("2023-W31", this.john, this.eric, List.of(), "new", "new");
+        assertThatThrownBy(() -> this.evaluationService.addPeerEvaluation(request))
+                .isInstanceOf(PeerEvaluationIllegalArgumentException.class).hasMessageContaining("active student");
+        org.mockito.Mockito.verify(this.evaluationRepository, org.mockito.Mockito.never()).save(any());
+    }
+
+    @Test
+    void testReportRetainsInactiveReceivedHistoryAfterTeamRemoval() {
+        this.eric.setEnabled(false);
+        this.eric.setTeam(null);
+        this.woody.setEnabled(false);
+        given(this.sectionRepository.findById(2)).willReturn(Optional.of(this.john.getSection()));
+        given(this.studentRepository.findBySectionSectionId(2)).willReturn(List.of(this.john, this.eric, this.woody));
+        given(this.evaluationRepository.findEvaluateeIds(2, "2023-W32")).willReturn(List.of(this.eric.getId()));
+        given(this.evaluationRepository.findByWeekAndEvaluateeId(org.mockito.ArgumentMatchers.eq("2023-W32"), anyInt()))
+                .willAnswer(invocation -> invocation.getArgument(1).equals(this.eric.getId()) ? this.ericsW32Evaluations : List.of());
+        WeeklyPeerEvaluationReport report = this.evaluationService.generateWeeklyPeerEvaluationReportForSection(2, "2023-W32");
+        assertThat(report.getPeerEvaluationAverages()).extracting(PeerEvaluationAverage::getStudentId)
+                .containsExactly(this.john.getId(), this.eric.getId());
+        PeerEvaluationAverage retained = report.getPeerEvaluationAverages().get(1);
+        assertThat(retained.getTeamName()).isNull();
+        assertThat(retained.getAverageTotalScore()).isEqualTo(this.ericsW32Evaluations.stream().mapToDouble(PeerEvaluation::getTotalScore).average().orElseThrow());
+        assertThat(retained.getPublicComments()).containsExactlyElementsOf(this.ericsW32Evaluations.stream().map(PeerEvaluation::getPublicComment).toList());
+    }
+
 }

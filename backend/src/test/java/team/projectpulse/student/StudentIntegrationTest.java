@@ -232,7 +232,7 @@ class StudentIntegrationTest extends AbstractIntegrationTest {
         studentDto.put("firstName", "John (updated)");
         studentDto.put("lastName", "Smith");
         studentDto.put("email", "j.smith@abc.edu");
-        studentDto.put("enabled", false); // Student cannot change their enabled status.
+        studentDto.put("enabled", true); // Ordinary profile saves preserve the observed active status.
         studentDto.put("roles", "instructor"); // Student cannot change their role.
 
         String json = this.jsonMapper.writeValueAsString(studentDto);
@@ -250,6 +250,26 @@ class StudentIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.data.password").doesNotExist())
                 .andExpect(jsonPath("$.data.enabled").value(true)) // The enabled status should not be changed.
                 .andExpect(jsonPath("$.data.roles").value("student")); // The role should not be changed.
+    }
+
+    @Test
+    void testGenericProfileSaveCannotDeactivateStudent() throws Exception {
+        Map<String, Object> studentDto = new HashMap<>();
+        studentDto.put("username", "changed");
+        studentDto.put("firstName", "Changed");
+        studentDto.put("lastName", "Smith");
+        studentDto.put("email", "changed@abc.edu");
+        studentDto.put("enabled", false);
+        this.mockMvc.perform(put(this.baseUrl + "/students/4")
+                        .contentType(MediaType.APPLICATION_JSON).content(this.jsonMapper.writeValueAsString(studentDto))
+                        .header(HttpHeaders.AUTHORIZATION, this.studentJohnToken))
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.status().isBadRequest())
+                .andExpect(jsonPath("$.flag").value(false))
+                .andExpect(jsonPath("$.code").value(StatusCode.INVALID_ARGUMENT));
+        this.mockMvc.perform(get(this.baseUrl + "/students/4").header(HttpHeaders.AUTHORIZATION, this.studentJohnToken))
+                .andExpect(jsonPath("$.data.firstName").value("John"))
+                .andExpect(jsonPath("$.data.email").value("j.smith@abc.edu"))
+                .andExpect(jsonPath("$.data.enabled").value(true));
     }
 
     @Test
