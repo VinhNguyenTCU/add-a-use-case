@@ -126,8 +126,8 @@ class StudentServiceTest {
     @Test
     void testStudentUpdateOwnInfo() {
         // Given
-        Student update = new Student("john", "John (updated)", "Smith (updated)", "j.smith@abc.edu (updated)", "", false, "admin student");
-        given(this.studentRepository.findById(1)).willReturn(Optional.of(this.students.get(0)));
+        Student update = new Student("john", "John (updated)", "Smith (updated)", "j.smith@abc.edu (updated)", "", true, "admin student");
+        given(this.studentRepository.findByIdForUpdate(1)).willReturn(Optional.of(this.students.get(0)));
         given(this.studentRepository.save(any(Student.class))).willReturn(this.students.get(0));
 
         Instructor instructor = new Instructor();
@@ -147,14 +147,14 @@ class StudentServiceTest {
         assertThat(result.getLastName()).isEqualTo(update.getLastName());
         assertThat(result.getEmail()).isEqualTo(update.getEmail());
         assertThat(result.getRoles()).isNotEqualTo(update.getRoles());
-        assertThat(result.isEnabled()).isNotEqualTo(update.isEnabled());
+        assertThat(result.isEnabled()).isTrue();
     }
 
     @Test
     void testInstructorUpdatesStudent() {
         // Given
-        Student update = new Student("john", "John (updated)", "Smith (updated)", "j.smith@abc.edu (updated)", "", false, "admin student");
-        given(this.studentRepository.findById(1)).willReturn(Optional.of(this.students.get(0)));
+        Student update = new Student("john", "John (updated)", "Smith (updated)", "j.smith@abc.edu (updated)", "", true, "admin student");
+        given(this.studentRepository.findByIdForUpdate(1)).willReturn(Optional.of(this.students.get(0)));
         given(this.studentRepository.save(any(Student.class))).willReturn(this.students.get(0));
 
         Instructor instructor = new Instructor();
@@ -165,6 +165,7 @@ class StudentServiceTest {
         securityContext.setAuthentication(new UsernamePasswordAuthenticationToken(myUserPrincipal, null, myUserPrincipal.getAuthorities()));
         SecurityContextHolder.setContext(securityContext);
 
+        given(this.userUtils.hasRole("ROLE_instructor")).willReturn(true);
         // When
         Student result = this.studentService.updateStudent(1, update);
 

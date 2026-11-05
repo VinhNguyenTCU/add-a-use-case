@@ -47,4 +47,12 @@ public class StudentSecurityService {
                 .anyMatch(instructor -> instructor.getId().equals(instructorIdFromJwt));
     }
 
+    public boolean canDeactivateStudent(Integer studentId) {
+        if (studentId == null || !(this.userUtils.hasRole("ROLE_instructor") || this.userUtils.hasRole("ROLE_admin"))) {
+            return false;
+        }
+        Integer callerId = this.userUtils.getUserId();
+        return callerId != null && this.studentRepository.findLifecycleStudent(studentId, callerId).isPresent();
+    }
+
 }
